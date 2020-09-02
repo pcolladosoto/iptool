@@ -1,0 +1,6 @@
+# Get rid of hidden files except .gitignore
+.*
+!.gitignore
+
+# Get rid of Python Compiled ByteCode
+__pycache__

@@ -1,30 +1,47 @@
-def __request_ip__(self, subnet):
-    if subnet in self.next_subn_addr:
-        self.next_subn_addr[subnet] += 1
-        return self.__binary_to_addr__(self.next_subn_addr[subnet] - 1) + '/' + subnet.split('/')[1]
-    raise ValueError("The specified subnet hasn't been created yet!")
+"""
+    Module Notes:
+        + When returning IPs as integers we are masking them with 0xFFFFFFF
+            because Python's number representation will be C2 when dealing
+            with bitwise operations. As subnet masks should always begin with
+            a bit set to 1, Python interpreted the BRD address as a negative
+            number as it should according to the C2 scheme... What we are doing
+            with the 0xFFFFFFFF mask is removing the trailing 1s so that the number
+            becomes positive. We should take into account Python offers the abstraction
+            of working with an "infinite" number of sign bits. As the mask will
+            also be extended to the same length we are cancelling all the sign 1s
+            making our number be interpreted as a negative one. In other words, we
+            are "making our number "positive" by truncating the "negative" part.
 
-def __addr_to_binary__(self, addr):
+            We could also add 2**32 (or 1 << 32) to the end result so that we flip
+            the bit left of the 31st one, causing a carry that will change the
+            magnitudes sign in the end. We nevertheless like masks more...
+
+            Info taken from:
+                https://stackoverflow.com/questions/20766813/how-to-convert-signed\
+                -to-unsigned-integer-in-python#20768199
+"""
+
+def addr_to_binary(addr):
     bin_ip, loop_count = 0, 0
     for x in reversed(addr.split('/')[0].split('.')):
         bin_ip |= int(x) << loop_count * 8
         loop_count += 1
-    return bin_ip
+    return bin_ip & 0xFFFFFFFF
 
-def __binary_to_addr__(self, bin):
+def binary_to_addr(bin):
     addr = ""
     for i in range(3, -1, -1):
         addr += str(bin >> 8 * i & 0xFF) + '.'
-    return addr[:len(addr) - 1]
+    return addr[:-1]
 
-def __get_net_addr__(self, subn):
+def get_net_addr(subn):
     mask = 0
     for i in range(int(subn.split('/')[1])):
         mask |= 0x1 << (31 - i)
-    return self.__addr_to_binary__(subn) & mask
+    return (addr_to_binary(subn) & mask) & 0xFFFFFFFF
 
-def __get_brd_addr__(self, subn):
+def get_brd_addr(subn):
     mask = 0
     for i in range(int(subn.split('/')[1])):
         mask |= 0x1 << (31 - i)
-    return self.__get_net_addr__(subn) | ~mask
+    return (get_net_addr(subn) | ~mask) & 0xFFFFFFFF

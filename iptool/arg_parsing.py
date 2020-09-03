@@ -1,11 +1,24 @@
 import argparse
 
-def parse_args(version):
+def p_args(version):
     parser = argparse.ArgumentParser(description = "iptool v{}".format(version))
-    parser.add_argument('ip', type = check_valid_ip, nargs = '?', help = "IP address to work on")
-    parser.add_argument('-l', '--limits', type = check_valid_cidr, help = "Find the limits of the provided CIDR block")
-    parser.add_argument('-b', '--binary', help = "Enable displaying the IP addresses as binary numbers")
-    return vars(parser.parse_args())
+    parser.add_argument('ip', type = check_valid_ip, nargs = '?', help = "IP address to work on.")
+    parser.add_argument('-c', '--cidr', type = check_valid_cidr, help = "Find the limits of the provided CIDR block"\
+                                                                        " or whether the provided IP belongs to the CIDR block.")
+    parser.add_argument('-b', '--binary', action = 'store_true', help = "Display the given IP as a BINARY number.")
+    parser.add_argument('-x', '--hex', action = 'store_true', help = "Display the given IP as a HEX number.")
+
+    parsed_args = vars(parser.parse_args())
+
+    # print(parsed_args)
+
+    if parsed_args['binary'] or parsed_args['hex']:
+        if not parsed_args['ip']:
+            parser.error("Missing an IP!")
+        elif parsed_args['cidr']:
+            parser.error("Options -c and -b or -h are incompatible!")
+
+    return parsed_args
 
 def check_valid_ip(ip):
     ip_chunks = ip.split('.')

@@ -28,10 +28,10 @@ def addr_to_binary(addr):
         loop_count += 1
     return bin_ip & 0xFFFFFFFF
 
-def binary_to_addr(bin):
+def binary_to_addr(binary):
     addr = ""
     for i in range(3, -1, -1):
-        addr += str(bin >> 8 * i & 0xFF) + '.'
+        addr += str(binary >> 8 * i & 0xFF) + '.'
     return addr[:-1]
 
 def get_net_addr(subn):
@@ -45,3 +45,24 @@ def get_brd_addr(subn):
     for i in range(int(subn.split('/')[1])):
         mask |= 0x1 << (31 - i)
     return (get_net_addr(subn) | ~mask) & 0xFFFFFFFF
+
+def get_binary(addr, ip_v = 4):
+    str_addr = ""
+    b_addr = addr_to_binary(addr)
+
+    for i in range(8 * ip_v):
+        str_addr = str(((1 << i) & b_addr) >> i) + str_addr
+
+        if (i + 1) % 4 == 0:
+            str_addr = ' ' + str_addr
+
+    return str_addr.lstrip()
+
+def get_hex(addr, ip_v = 4):
+    str_addr = ""
+    b_addr = addr_to_binary(addr)
+
+    for i in range(2 * ip_v):
+        str_addr = '    ' + format((b_addr >> (i * 4)) & 0xF, 'X') + str_addr
+
+    return '0x' + str_addr[1:]

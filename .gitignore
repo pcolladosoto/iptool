@@ -4,3 +4,10 @@
 
 # Get rid of Python Compiled ByteCode
 __pycache__
+
+# Get rid of the build directories
+build
+dist
+
+# Get rid build-time waste
+iptool.egg-info

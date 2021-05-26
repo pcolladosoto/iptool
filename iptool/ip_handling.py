@@ -29,10 +29,7 @@ def addr_to_binary(addr):
     return bin_ip & 0xFFFFFFFF
 
 def binary_to_addr(binary):
-    addr = ""
-    for i in range(3, -1, -1):
-        addr += str(binary >> 8 * i & 0xFF) + '.'
-    return addr[:-1]
+    return ".".join(str(binary >> 8 * i & 0xFF) for i in range(3, -1, -1))
 
 def get_net_addr(subn):
     mask = 0
